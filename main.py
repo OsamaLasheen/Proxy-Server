@@ -1,5 +1,5 @@
 from socket import *
-import sys
+import requests
 
 # Create a TCP/IP socket
 sock = socket(AF_INET, SOCK_STREAM)
@@ -25,18 +25,22 @@ while True:
             print('received {!r}'.format(data))
             if data:
                 print('sending data back to the client')
-                # connection.sendall(data)
 
                 # Create a TCP/IP socket
                 external_sock = socket(AF_INET, SOCK_STREAM)
 
                 # Bind the socket to the port
-                server_address = (data.split()[1][5:].decode("utf-8"), 8080)
+                url = data.split()[1][5:].decode("utf-8")
+                server_address = (url, 80)
                 print('starting up on {} port {}'.format(*server_address))
                 external_sock.connect(server_address)
-                external_sock.sendall(data)
+                getUrl = 'http://' + url
+                external_sock.sendall(bytes (requests.get(getUrl).text,'utf-8'))
+                print(requests.get(getUrl).text)
+                ex_response = external_sock.recv(4096)
+                print(ex_response)
+                connection.sendall(ex_response)
 
-                print(external_sock.recv(4096))
             else:
                 print('no data from', client_address)
                 break
