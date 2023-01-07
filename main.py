@@ -29,7 +29,7 @@ while True:
             print('received {!r}'.format(data))
             cache = Cache()
             filter = Filter()
-#t
+
             if data:
                 print('sending data back to the client')
 
@@ -42,6 +42,7 @@ while True:
                 if webUrl[0]:
                     warnings.warn(webUrl[1])
                     messagebox.showerror('error',webUrl[1])
+                    exit()
                 else:
                    messagebox.showinfo('message',webUrl[1])
 

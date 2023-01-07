@@ -1,5 +1,5 @@
 class Filter:
-#test
+
     def isBlocked(self,website_url: str):
 
         URL_found_flag = False
