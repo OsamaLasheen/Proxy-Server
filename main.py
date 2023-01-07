@@ -1,5 +1,9 @@
 from socket import *
 from cache import Cache
+from URLFilter import Filter
+import warnings
+from tkinter import messagebox
+
 
 # Create a TCP/IP socket
 sock = socket(AF_INET, SOCK_STREAM)
@@ -24,6 +28,8 @@ while True:
             data = connection.recv(4096)
             print('received {!r}'.format(data))
             cache = Cache()
+            filter = Filter()
+
             if data:
                 print('sending data back to the client')
 
@@ -31,6 +37,17 @@ while True:
                 external_socket = socket(AF_INET, SOCK_STREAM)
 
                 url = data.split()[1][5:].decode("utf-8")
+
+                webUrl = filter.isBlocked(url)
+                if webUrl[0]:
+                    warnings.warn(webUrl[1])
+                    messagebox.showerror('error',webUrl[1])
+                else:
+                   messagebox.showinfo('message',webUrl[1])
+
+
+
+
 
                 website = cache.is_cached(website_url=url)
 
