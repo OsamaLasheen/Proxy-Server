@@ -8,7 +8,7 @@ from tkinter import messagebox
 # Create a TCP/IP socket
 sock = socket(AF_INET, SOCK_STREAM)
 
-# Bind the socket to the port
+# Bind the socket to the port number 8888
 server_address = ('localhost', 8888)
 print('starting up on {} port {}'.format(*server_address))
 sock.bind(server_address)
@@ -41,14 +41,11 @@ while True:
                 webUrl = filter.isBlocked(url)
                 if webUrl[0]:
                     warnings.warn(webUrl[1])
-                    messagebox.showerror('error',webUrl[1])
-                    exit()
-                else:
-                   messagebox.showinfo('message',webUrl[1])
-
-
-
-
+                    messagebox.showerror('error', webUrl[1])
+                    continue
+                    # exit()
+                # else:
+                #     messagebox.showinfo('message', webUrl[1])
 
                 website = cache.is_cached(website_url=url)
 
@@ -61,17 +58,23 @@ while True:
                 else:
                     server_address = (url, 80)
                     print('starting up on {} port {}'.format(*server_address))
-                    external_socket.connect(server_address)  # connecting to the destination web server
+
+                    # Connecting to the destination web server
+                    external_socket.connect(server_address)
 
                     external_socket.sendall(bytes('GET / HTTP/1.1\r\nHost: ' + url + '\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nsec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Brave";v="108"\r\nsec-ch-ua-mobile: ?0\r\nsec-ch-ua-platform: "Windows"\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\r\nSec-GPC: 1\r\nAccept-Language: en-US,en\r\nSec-Fetch-Site: none\r\nSec-Fetch-Mode: navigate\r\nSec-Fetch-User: ?1\r\nSec-Fetch-Dest: document\r\nAccept-Encoding: gzip, deflate, br\r\n\r\n', 'utf-8'))
 
-                    external_response = external_socket.recv(4096)  # receiving the response from the destination web server
+                    # Receiving the response from the destination web server
+                    external_response = external_socket.recv(4096)
 
-                    connection.sendall(external_response)  # forwarding the response to the client
+                    # Forwarding the response to the client
+                    connection.sendall(external_response)
 
-                    external_socket.close()  # closing the external socket
+                    # Closing the external socket
+                    external_socket.close()
 
-                    cache.add_website(website_url=url, response=external_response)  # caching the un-cached website
+                    # Caching the un-cached website
+                    cache.add_website(website_url=url, response=external_response)
 
             else:
                 print('no data from', client_address)
