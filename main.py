@@ -1,11 +1,11 @@
 from socket import *
-import requests
+from cache import Cache
 
 # Create a TCP/IP socket
 sock = socket(AF_INET, SOCK_STREAM)
 
 # Bind the socket to the port
-server_address = ('localhost', 8080)
+server_address = ('localhost', 8888)
 print('starting up on {} port {}'.format(*server_address))
 sock.bind(server_address)
 
@@ -23,23 +23,37 @@ while True:
         while True:
             data = connection.recv(4096)
             print('received {!r}'.format(data))
+            cache = Cache()
             if data:
                 print('sending data back to the client')
 
                 # Create a TCP/IP socket
-                external_sock = socket(AF_INET, SOCK_STREAM)
+                external_socket = socket(AF_INET, SOCK_STREAM)
 
-                # Bind the socket to the port
                 url = data.split()[1][5:].decode("utf-8")
-                server_address = (url, 80)
-                print('starting up on {} port {}'.format(*server_address))
-                external_sock.connect(server_address)
-                getUrl = 'http://' + url
-                external_sock.sendall(bytes (requests.get(getUrl).text,'utf-8'))
-                print(requests.get(getUrl).text)
-                ex_response = external_sock.recv(4096)
-                print(ex_response)
-                connection.sendall(ex_response)
+
+                website = cache.is_cached(website_url=url)
+
+                if website.is_cached:
+                    print('The Requested Website is Cached :)')
+
+                    # Sending the cached website to the client
+                    connection.sendall(website.response)
+
+                else:
+                    server_address = (url, 80)
+                    print('starting up on {} port {}'.format(*server_address))
+                    external_socket.connect(server_address)  # connecting to the destination web server
+
+                    external_socket.sendall(bytes('GET / HTTP/1.1\r\nHost: ' + url + '\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nsec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Brave";v="108"\r\nsec-ch-ua-mobile: ?0\r\nsec-ch-ua-platform: "Windows"\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\r\nSec-GPC: 1\r\nAccept-Language: en-US,en\r\nSec-Fetch-Site: none\r\nSec-Fetch-Mode: navigate\r\nSec-Fetch-User: ?1\r\nSec-Fetch-Dest: document\r\nAccept-Encoding: gzip, deflate, br\r\n\r\n', 'utf-8'))
+
+                    external_response = external_socket.recv(4096)  # receiving the response from the destination web server
+
+                    connection.sendall(external_response)  # forwarding the response to the client
+
+                    external_socket.close()  # closing the external socket
+
+                    cache.add_website(website_url=url, response=external_response)  # caching the un-cached website
 
             else:
                 print('no data from', client_address)
