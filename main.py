@@ -39,13 +39,10 @@ while True:
                 url = data.split()[1][5:].decode("utf-8")
 
                 webUrl = filter.isBlocked(url)
-                if webUrl[0]:
-                    warnings.warn(webUrl[1])
-                    messagebox.showerror('error', webUrl[1])
+                if webUrl.is_blocked:
+                    warnings.warn(webUrl.message)
+                    messagebox.showerror('error', webUrl.message)
                     continue
-                    # exit()
-                # else:
-                #     messagebox.showinfo('message', webUrl[1])
 
                 website = cache.is_cached(website_url=url)
 

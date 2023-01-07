@@ -1,22 +1,25 @@
+from filter_result import FilterResult
+
+
 class Filter:
 
-    def isBlocked(self,website_url: str):
+    def is_blocked(self, website_url: str) -> FilterResult:
 
-        URL_found_flag = False
+        url_found_flag = False
         f = open("URLs.txt", "r")
 
         for x in f:
             x = x.replace("\n", "")
-            if (x.__eq__(website_url)):
-                URL_found_flag = True
+            if x.__eq__(website_url):
+                url_found_flag = True
                 break
 
         f.close()
 
-        if (URL_found_flag):
+        if url_found_flag:
             data = "This URL is blocked!!!!!"
-            return (True,data)
+            return FilterResult(is_blocked=True, message=data)
 
         else:
             data = "This URL is not blocked."
-            return (False,data)
+            return FilterResult(is_blocked=False, message=data)
