@@ -48,7 +48,7 @@ while True:
                 website = cache.is_cached(website_url=url)
 
                 if website.is_cached:
-                    print('The Requested Website is Cached :)')
+                    print('\nThe Requested Website is Cached :)\n')
 
                     # Sending the cached website to the client
                     connection.sendall(website.response)
@@ -71,6 +71,8 @@ while True:
 
                         # Closing the external socket
                         external_socket.close()
+
+                        print('\nThe Requested Website is NOT Cached :(\n')
 
                         # Caching the un-cached website
                         cache.add_website(website_url=url, response=external_response)
